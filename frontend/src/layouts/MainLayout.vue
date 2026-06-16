@@ -27,6 +27,7 @@
           </template>
           <el-menu-item index="/passenger">旅客管理</el-menu-item>
           <el-menu-item index="/flight">航班管理</el-menu-item>
+          <el-menu-item index="/flight-change">航班变更联动</el-menu-item>
         </el-sub-menu>
 
         <el-sub-menu index="reception">

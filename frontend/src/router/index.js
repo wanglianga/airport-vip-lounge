@@ -26,6 +26,12 @@ const routes = [
         meta: { title: '航班管理' }
       },
       {
+        path: 'flight-change',
+        name: 'FlightChangeManage',
+        component: () => import('@/views/airline/FlightChangeManage.vue'),
+        meta: { title: '航班变更联动' }
+      },
+      {
         path: 'checkin',
         name: 'CheckIn',
         component: () => import('@/views/reception/CheckIn.vue'),

@@ -219,3 +219,100 @@ INSERT INTO staff (name, role, status, phone, current_task_count) VALUES
 ('张厨师', 'CHEF', 'ON_DUTY', '13700137003', 1),
 ('李师傅', 'DRIVER', 'BUSY', '13700137004', 1),
 ('小陈', 'RECEPTION', 'OFF_DUTY', '13700137005', 0);
+
+-- Flight Change table
+CREATE TABLE IF NOT EXISTS flight_change (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flight_id BIGINT NOT NULL COMMENT '航班ID',
+    flight_no VARCHAR(20) COMMENT '航班号',
+    change_type VARCHAR(20) COMMENT '变更类型: STATUS/GATE/FAR_STAND/DELAY',
+    old_status VARCHAR(20) COMMENT '原状态',
+    new_status VARCHAR(20) COMMENT '新状态',
+    old_gate VARCHAR(20) COMMENT '原登机口',
+    new_gate VARCHAR(20) COMMENT '新登机口',
+    old_far_stand BOOLEAN DEFAULT FALSE COMMENT '原远机位',
+    new_far_stand BOOLEAN DEFAULT FALSE COMMENT '新远机位',
+    old_scheduled_departure DATETIME COMMENT '原计划起飞时间',
+    new_scheduled_departure DATETIME COMMENT '新计划起飞时间',
+    notified_by VARCHAR(20) COMMENT '通知方: AIRLINE/ATC/MANUAL',
+    notified_by_name VARCHAR(50) COMMENT '通知人姓名',
+    remark VARCHAR(500) COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flight_id (flight_id),
+    INDEX idx_create_time (create_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='航班变更记录表';
+
+-- Passenger Confirmation table
+CREATE TABLE IF NOT EXISTS passenger_confirmation (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flight_change_id BIGINT NOT NULL COMMENT '航班变更ID',
+    flight_id BIGINT COMMENT '航班ID',
+    passenger_id BIGINT NOT NULL COMMENT '旅客ID',
+    passenger_name VARCHAR(100) COMMENT '旅客姓名',
+    passenger_phone VARCHAR(20) COMMENT '旅客电话',
+    confirm_status VARCHAR(20) DEFAULT 'PENDING' COMMENT '确认状态: PENDING/CONFIRMED',
+    passenger_choice VARCHAR(20) COMMENT '旅客选择: CONTINUE/REBOOK/OTHER',
+    new_flight_no VARCHAR(20) COMMENT '改签航班号',
+    need_packed_meal BOOLEAN DEFAULT FALSE COMMENT '是否需要打包餐食',
+    confirmed_by VARCHAR(20) COMMENT '确认人角色',
+    confirmed_by_name VARCHAR(50) COMMENT '确认人姓名',
+    confirm_time DATETIME COMMENT '确认时间',
+    remark VARCHAR(500) COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flight_change_id (flight_change_id),
+    INDEX idx_passenger_id (passenger_id),
+    INDEX idx_confirm_status (confirm_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='旅客确认记录表';
+
+-- Service Adjustment table
+CREATE TABLE IF NOT EXISTS service_adjustment (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    flight_change_id BIGINT NOT NULL COMMENT '航班变更ID',
+    flight_id BIGINT COMMENT '航班ID',
+    passenger_id BIGINT COMMENT '旅客ID',
+    passenger_name VARCHAR(100) COMMENT '旅客姓名',
+    service_type VARCHAR(20) COMMENT '服务类型: SEAT/MEAL/SHOWER/MEETING/VEHICLE',
+    service_record_id BIGINT COMMENT '服务记录ID',
+    adjustment_type VARCHAR(20) COMMENT '调整类型: EXTEND/CANCEL/KEEP_WARM/PENDING_RELEASE/PENDING_CANCEL',
+    old_start_time DATETIME COMMENT '原开始时间',
+    old_end_time DATETIME COMMENT '原结束时间',
+    new_start_time DATETIME COMMENT '新开始时间',
+    new_end_time DATETIME COMMENT '新结束时间',
+    old_status VARCHAR(20) COMMENT '原状态',
+    new_status VARCHAR(20) COMMENT '新状态',
+    remark VARCHAR(500) COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_flight_change_id (flight_change_id),
+    INDEX idx_passenger_id (passenger_id),
+    INDEX idx_service_type (service_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='服务调整记录表';
+
+-- Vehicle Task table
+CREATE TABLE IF NOT EXISTS vehicle_task (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    vehicle_id BIGINT COMMENT '车辆ID',
+    plate_no VARCHAR(20) COMMENT '车牌号',
+    passenger_id BIGINT COMMENT '旅客ID',
+    passenger_name VARCHAR(100) COMMENT '旅客姓名',
+    flight_id BIGINT COMMENT '航班ID',
+    flight_no VARCHAR(20) COMMENT '航班号',
+    task_type VARCHAR(20) COMMENT '任务类型: PICKUP/DROPOFF/FERRY',
+    pickup_location VARCHAR(200) COMMENT '接人地点',
+    dropoff_location VARCHAR(200) COMMENT '送达地点',
+    scheduled_pickup_time DATETIME COMMENT '计划接人时间',
+    actual_pickup_time DATETIME COMMENT '实际接人时间',
+    actual_arrival_time DATETIME COMMENT '实际到达时间',
+    status VARCHAR(20) DEFAULT 'PENDING' COMMENT '状态: PENDING/ASSIGNED/IN_PROGRESS/COMPLETED/CANCELLED',
+    flight_change_id BIGINT COMMENT '关联航班变更ID',
+    task_source VARCHAR(20) COMMENT '任务来源: NORMAL/FLIGHT_CHANGE',
+    remark VARCHAR(500) COMMENT '备注',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_vehicle_id (vehicle_id),
+    INDEX idx_flight_id (flight_id),
+    INDEX idx_flight_change_id (flight_change_id),
+    INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='车辆任务表';
